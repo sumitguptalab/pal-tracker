@@ -18,6 +18,11 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile("org.springframework.boot:spring-boot-actuator-docs")
     compile("org.springframework.boot:spring-boot-starter-security")
+    // for OAuth 2.0
+    compile 'org.springframework.security.oauth:spring-security-oauth2:2.2.2.BUILD-SNAPSHOT'
+    // for OAuth 1.0a
+    compile 'org.springframework.security.oauth:spring-security-oauth:2.2.2.BUILD-SNAPSHOT'
+
 
     testCompile("org.springframework.boot:spring-boot-starter-test")
 

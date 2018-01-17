@@ -4,3 +4,4 @@ build
 *.iml
 ci/variables.yml
 out
+logs/palTracker.log
