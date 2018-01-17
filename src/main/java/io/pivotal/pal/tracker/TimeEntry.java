@@ -72,6 +72,7 @@ public class TimeEntry {
         this.hours = hours;
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
