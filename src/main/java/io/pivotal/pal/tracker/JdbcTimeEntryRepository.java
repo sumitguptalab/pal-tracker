@@ -67,6 +67,8 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
                 }
         );
 
+//        String selectQuery = "SELECT * FROM time_entries WHERE id = " + id;
+//        List<TimeEntry> timeEntries = jdbcTemplate.queryForList(selectQuery, TimeEntry.class);
         return timeEntries.isEmpty() ? null : timeEntries.get(0);
     }
 
@@ -112,12 +114,16 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
 //        jdbcTemplate.update(new UpdatePreparedStatmentCreator(id,timeEntry));
 
         //Third Ways
+//        jdbcTemplate.execute(new UpdatePreparedStatmentCreator(id,timeEntry), (PreparedStatementCallback) ps -> ps.executeUpdate());
+
+        // Fourth Way
         jdbcTemplate.execute(new UpdatePreparedStatmentCreator(id,timeEntry), new PreparedStatementCallback() {
             @Override
             public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
                 return ps.executeUpdate();
             }
         });
+
         return find(id);
     }
 
