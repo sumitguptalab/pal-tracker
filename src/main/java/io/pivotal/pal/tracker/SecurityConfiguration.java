@@ -32,6 +32,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     // it is because spring boot 2 will use spring security 5:
     // https://spring.io/blog/2017/11/01/spring-security-5-0-0-rc1-released#password-storage-updated
     // for Ldap security see https://spring.io/guides/gs/authenticating-ldap/ link
+    // For oauth example see https://github.com/spring-projects/spring-security-oauth
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
