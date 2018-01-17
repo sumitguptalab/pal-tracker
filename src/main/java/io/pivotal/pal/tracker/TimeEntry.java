@@ -1,5 +1,6 @@
 package io.pivotal.pal.tracker;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -88,4 +89,5 @@ public class TimeEntry {
 
         return Objects.hash(id, projectId, userId, date, hours);
     }
+
 }
