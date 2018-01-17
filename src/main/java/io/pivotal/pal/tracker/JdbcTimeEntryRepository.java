@@ -1,15 +1,11 @@
 package io.pivotal.pal.tracker;
 
-import com.mysql.cj.jdbc.MysqlDataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 
+import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
-import java.time.LocalDate;
 import java.util.List;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -18,7 +14,7 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
     private JdbcTemplate jdbcTemplate;
 
-    public JdbcTimeEntryRepository(MysqlDataSource dataSource) {
+    public JdbcTimeEntryRepository(DataSource dataSource) {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -39,7 +35,7 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
             return preparedStatement;
 
-        },holder);
+        }, holder);
 
         return find(holder.getKey().longValue());
     }
@@ -57,7 +53,7 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
                     timeEntry.setHours(rs.getInt("hours"));
                     return timeEntry;
                 }
-            );
+        );
 
         return timeEntries.isEmpty() ? null : timeEntries.get(0);
     }
