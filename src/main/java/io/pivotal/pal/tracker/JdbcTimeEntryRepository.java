@@ -1,10 +1,15 @@
 package io.pivotal.pal.tracker;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
 
@@ -13,6 +18,13 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
     private JdbcTemplate jdbcTemplate;
+
+    private String updateQuery = "UPDATE time_entries  " +
+            "              SET project_id = ?,  " +
+            "                  user_id = ?,  " +
+            "                  date = ?,  " +
+            "                  hours = ?  " +
+            "              WHERE id = ?";
 
     public JdbcTimeEntryRepository(DataSource dataSource) {
         jdbcTemplate = new JdbcTemplate(dataSource);
@@ -75,26 +87,37 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
     @Override
     public TimeEntry update(long id, TimeEntry timeEntry) {
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    "UPDATE time_entries " +
-                            "SET project_id = ?, " +
-                            " user_id = ?, " +
-                            " date = ?, " +
-                            " hours = ? " +
-                            "WHERE id = ?");
+        // First Way
+//        jdbcTemplate.update(connection -> {
+//            PreparedStatement preparedStatement = connection.prepareStatement(
+//                    "UPDATE time_entries " +
+//                            "SET project_id = ?, " +
+//                            " user_id = ?, " +
+//                            " date = ?, " +
+//                            " hours = ? " +
+//                            "WHERE id = ?");
+//
+//            int indx = 1;
+//            preparedStatement.setObject(indx++, timeEntry.getProjectId(), Types.BIGINT);
+//            preparedStatement.setObject(indx++, timeEntry.getUserId(), Types.BIGINT);
+//            preparedStatement.setObject(indx++, timeEntry.getDate(), Types.DATE);
+//            preparedStatement.setObject(indx++, timeEntry.getHours(), Types.INTEGER);
+//            preparedStatement.setObject(indx++, id, Types.BIGINT);
+//
+//            return preparedStatement;
+//
+//        });
 
-            int indx = 1;
-            preparedStatement.setObject(indx++, timeEntry.getProjectId(), Types.BIGINT);
-            preparedStatement.setObject(indx++, timeEntry.getUserId(), Types.BIGINT);
-            preparedStatement.setObject(indx++, timeEntry.getDate(), Types.DATE);
-            preparedStatement.setObject(indx++, timeEntry.getHours(), Types.INTEGER);
-            preparedStatement.setObject(indx++, id, Types.BIGINT);
+        // Second Way
+//        jdbcTemplate.update(new UpdatePreparedStatmentCreator(id,timeEntry));
 
-            return preparedStatement;
-
+        //Third Ways
+        jdbcTemplate.execute(new UpdatePreparedStatmentCreator(id,timeEntry), new PreparedStatementCallback() {
+            @Override
+            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, DataAccessException {
+                return ps.executeUpdate();
+            }
         });
-
         return find(id);
     }
 
@@ -111,4 +134,27 @@ public class JdbcTimeEntryRepository implements TimeEntryRepository {
 
         });
     }
+
+    private class UpdatePreparedStatmentCreator implements PreparedStatementCreator {
+        long id;
+        TimeEntry timeEntry;
+        public UpdatePreparedStatmentCreator(long id, TimeEntry timeEntry) {
+            this.id = id;
+            this.timeEntry = timeEntry;
+        }
+
+        @Override
+        public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+            PreparedStatement preparedStatement = con.prepareStatement(updateQuery);
+            int indx = 1;
+            preparedStatement.setObject(indx++, timeEntry.getProjectId(), Types.BIGINT);
+            preparedStatement.setObject(indx++, timeEntry.getUserId(), Types.BIGINT);
+            preparedStatement.setObject(indx++, timeEntry.getDate(), Types.DATE);
+            preparedStatement.setObject(indx++, timeEntry.getHours(), Types.INTEGER);
+            preparedStatement.setObject(indx++, id, Types.BIGINT);
+
+            return preparedStatement;
+        }
+    }
+
 }
